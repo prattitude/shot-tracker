@@ -9,6 +9,13 @@
     <meta name="theme-color" content="#1a472a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Pool Analytics">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="application-name" content="Billiards Analytics">
+    <meta name="msapplication-TileColor" content="#1a472a">
+    <meta name="msapplication-config" content="browserconfig.xml">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiMxYTQ3MmEiLz4KPGNPCPEM9Ljk2IiBjeT0iOTYiIHI9IjY0IiBmaWxsPSIjMjJjNTVlIi8+Cjx0ZXh0IHg9Ijk2IiB5PSIxMTAiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjQ4IiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7wn46xPC90ZXh0Pgo8L3N2Zz4K">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDE5MiAxOTIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiByeD0iMjQiIGZpbGw9IiMxYTQ3MmEiLz4KPGNPCPEM9Ljk2IiBjeT0iOTYiIHI9IjY0IiBmaWxsPSIjMjJjNTVlIi8+Cjx0ZXh0IHg9Ijk2IiB5PSIxMTAiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjQ4IiBmaWxsPSIjZmZmZmZmIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7wn46xPC90ZXh0Pgo8L3N2Zz4K">
 </head>
 <body>
     <div class="container">
@@ -120,5 +127,90 @@
     </div>
 
     <script src="script.js"></script>
+    
+    <script>
+        // Register service worker for PWA functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+
+        // PWA install prompt
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent Chrome 67 and earlier from automatically showing the prompt
+            e.preventDefault();
+            // Stash the event so it can be triggered later
+            deferredPrompt = e;
+            
+            // Show install button or banner
+            showInstallPromotion();
+        });
+
+        function showInstallPromotion() {
+            // Create install button if it doesn't exist
+            if (!document.getElementById('installBtn')) {
+                const installBtn = document.createElement('button');
+                installBtn.id = 'installBtn';
+                installBtn.textContent = '📱 Install App';
+                installBtn.style.cssText = `
+                    position: fixed;
+                    top: 10px;
+                    right: 10px;
+                    background: #22c55e;
+                    color: white;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    font-size: 14px;
+                    z-index: 1000;
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                `;
+                
+                installBtn.addEventListener('click', () => {
+                    // Hide the app provided install promotion
+                    installBtn.style.display = 'none';
+                    // Show the install prompt
+                    deferredPrompt.prompt();
+                    // Wait for the user to respond to the prompt
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User accepted the install prompt');
+                        } else {
+                            console.log('User dismissed the install prompt');
+                        }
+                        deferredPrompt = null;
+                    });
+                });
+                
+                document.body.appendChild(installBtn);
+                
+                // Auto-hide after 10 seconds
+                setTimeout(() => {
+                    if (installBtn.style.display !== 'none') {
+                        installBtn.style.opacity = '0.7';
+                    }
+                }, 10000);
+            }
+        }
+
+        // Handle successful app install
+        window.addEventListener('appinstalled', (evt) => {
+            console.log('App successfully installed');
+            const installBtn = document.getElementById('installBtn');
+            if (installBtn) {
+                installBtn.remove();
+            }
+        });
+    </script>
 </body>
 </html>

@@ -39,6 +39,7 @@ class BilliardsAnalytics {
 
         this.initializeEventListeners();
         this.initializeChart();
+        this.loadGameData();
         this.startGame();
     }
 
@@ -63,6 +64,13 @@ class BilliardsAnalytics {
 
         // Prevent context menu on mobile
         document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // PWA specific event listeners
+        window.addEventListener('online', () => this.handleOnlineStatus());
+        window.addEventListener('offline', () => this.handleOnlineStatus());
+        
+        // Auto-save before page unload
+        window.addEventListener('beforeunload', () => this.saveGameData());
     }
 
     startGame() {
@@ -117,6 +125,9 @@ class BilliardsAnalytics {
         this.updateChart();
         this.startTimer();
         this.addToActivityLog('New game started - Player 1 begins');
+        
+        // Clear saved game data
+        localStorage.removeItem('billiardsAnalyticsData');
     }
 
     handleShot() {
@@ -212,15 +223,7 @@ class BilliardsAnalytics {
         }
     }
 
-    recordAction(action, player, time) {
-        this.gameHistory.push({
-            timestamp: Date.now(),
-            action: action,
-            player: player,
-            time: time,
-            gameTime: Date.now() - this.gameState.gameStartTime
-        });
-    }
+
 
     togglePause() {
         this.gameState.isPaused = !this.gameState.isPaused;
@@ -488,6 +491,80 @@ class BilliardsAnalytics {
     clearActivityLog() {
         const feed = document.getElementById('activityFeed');
         feed.innerHTML = '<div class="activity-item">Game started</div>';
+    }
+
+    // PWA Offline Data Management
+    loadGameData() {
+        try {
+            const savedData = localStorage.getItem('billiardsAnalyticsData');
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                
+                // Only load if it's a recent save (within 24 hours)
+                const saveAge = Date.now() - (data.savedAt || 0);
+                const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+                
+                if (saveAge < maxAge && data.gameState && data.players) {
+                    // Ask user if they want to continue the previous game
+                    const continueGame = confirm('Continue your previous game?');
+                    if (continueGame) {
+                        this.gameState = { ...this.gameState, ...data.gameState };
+                        this.players = { ...this.players, ...data.players };
+                        this.gameHistory = data.gameHistory || [];
+                        
+                        this.updateDisplay();
+                        this.updateChart();
+                        this.addToActivityLog('Game resumed from previous session');
+                        
+                        // Restart timer if game was not paused
+                        if (!this.gameState.isPaused) {
+                            this.gameState.lastActionTime = Date.now();
+                            this.startTimer();
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.log('No previous game data found or error loading:', error);
+        }
+    }
+
+    saveGameData() {
+        try {
+            const dataToSave = {
+                gameState: this.gameState,
+                players: this.players,
+                gameHistory: this.gameHistory,
+                savedAt: Date.now()
+            };
+            localStorage.setItem('billiardsAnalyticsData', JSON.stringify(dataToSave));
+        } catch (error) {
+            console.log('Error saving game data:', error);
+        }
+    }
+
+    // Enhanced record action with auto-save
+    recordAction(action, player, time) {
+        this.gameHistory.push({
+            timestamp: Date.now(),
+            action: action,
+            player: player,
+            time: time,
+            gameTime: Date.now() - this.gameState.gameStartTime
+        });
+        
+        // Auto-save game state for offline persistence
+        this.saveGameData();
+    }
+
+    // Network status awareness
+    handleOnlineStatus() {
+        if (navigator.onLine) {
+            this.addToActivityLog('Connected to internet');
+            // Sync any pending data if needed
+        } else {
+            this.addToActivityLog('Playing offline - data will sync when connected');
+        }
     }
 
     formatTime(milliseconds) {
