@@ -39,5 +39,16 @@
     }
   ],
   "scope": "/",
-  "prefer_related_applications": false
+  "prefer_related_applications": false,
+  "capture_links": "new-client",
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
+  "edge_side_panel": {
+    "preferred_width": 400
+  },
+  "protocol_handlers": [{
+    "protocol": "web+billiards",
+    "url": "/?action=%s"
+  }]
 }
