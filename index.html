@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Billiards Analytics</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1a472a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🎱 Billiards Analytics</h1>
+            <div class="game-info">
+                <div class="current-player">
+                    Player <span id="currentPlayer">1</span>'s Turn
+                </div>
+                <div class="timer">
+                    <span id="currentTime">00:00</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Player Stats Display -->
+        <section class="stats-display">
+            <div class="player-stats" id="player1Stats">
+                <h3>Player 1</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Shots:</span>
+                    <span class="stat-value" id="p1Shots">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Avg Time:</span>
+                    <span class="stat-value" id="p1AvgTime">0.0s</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Breaks:</span>
+                    <span class="stat-value" id="p1Breaks">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Fouls:</span>
+                    <span class="stat-value" id="p1Fouls">0</span>
+                </div>
+            </div>
+            
+            <div class="player-stats" id="player2Stats">
+                <h3>Player 2</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Shots:</span>
+                    <span class="stat-value" id="p2Shots">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Avg Time:</span>
+                    <span class="stat-value" id="p2AvgTime">0.0s</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Breaks:</span>
+                    <span class="stat-value" id="p2Breaks">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Fouls:</span>
+                    <span class="stat-value" id="p2Fouls">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Real-time Analytics Chart -->
+        <section class="chart-section">
+            <h3>Shot Time Patterns</h3>
+            <div class="chart-container">
+                <canvas id="analyticsChart" width="300" height="150"></canvas>
+            </div>
+        </section>
+
+        <!-- Control Buttons -->
+        <section class="controls">
+            <button id="shotBtn" class="action-btn shot-btn">
+                🎯 SHOT
+                <span class="btn-subtitle">Ball potted</span>
+            </button>
+            
+            <button id="switchBtn" class="action-btn switch-btn">
+                🔄 SWITCH
+                <span class="btn-subtitle">Miss - change turn</span>
+            </button>
+            
+            <button id="foulBtn" class="action-btn foul-btn">
+                ⚠️ FOUL
+                <span class="btn-subtitle">Rule violation</span>
+            </button>
+        </section>
+
+        <!-- Game Control -->
+        <section class="game-controls">
+            <button id="newGameBtn" class="control-btn">New Game</button>
+            <button id="pauseBtn" class="control-btn">Pause</button>
+            <button id="statsBtn" class="control-btn">Detailed Stats</button>
+        </section>
+
+        <!-- Activity Log -->
+        <section class="activity-log">
+            <h3>Game Log</h3>
+            <div id="activityFeed" class="activity-feed">
+                <div class="activity-item">Game started</div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Detailed Stats Modal -->
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Detailed Statistics</h2>
+            <div id="detailedStats"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
